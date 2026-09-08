@@ -1,6 +1,6 @@
 package com.example.lib
 
-ata class  Cliente (
+data class  Cliente (
     val nombre: String,
     val direccion: String
 )
