@@ -20,8 +20,13 @@ class Plato(
 ) : Producto(nombre, precioBase){
 
     override fun calcularPrecioFinal(): Double{
-        return precioBase * 1.25
+        return if (tamanoPorcion == "Grande") {
+            precioBase * 1.25
+    } else {
+            precioBase
+        }
     }
+        
 }
 
 
