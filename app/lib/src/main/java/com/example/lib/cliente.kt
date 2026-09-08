@@ -29,6 +29,20 @@ class Plato(
         
 }
 
+class Bebida(
+    nombre: String,
+    precioBase: Double,
+    val esAlcoholica: Boolean
+) : Producto(nombre, precioBase){
+
+    override fun calcularPrecioFinal(): Double {
+        return if (esAlcoholica){
+            precioBase + 800
+        } else {
+            precioBase
+        }
+    }
+}
 
 
 
@@ -38,5 +52,20 @@ class Plato(
 
 
 fun main(){
+
+
+
+
+
+     val horaPedido = 23
+    val esClienteFrecuente = true
+
+
+
+    val recargoNoturno = if (horaPedido >= 22 || horaPedido <6){
+        1000.0
+    } else {
+        0.0
+    }
   
 }
