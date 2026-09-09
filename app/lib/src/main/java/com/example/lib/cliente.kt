@@ -51,7 +51,7 @@ class Pedido(val cliente: Cliente, val productos: List<Producto>, val horaPed: I
 
 class ResumenPedido(var cantidadProductos: Int = 0, var totalAPagar: Double = 0.0)
 
-// 1. Definición de Sealed Class
+
 sealed class EstadoPedido {
     object Preparando : EstadoPedido()
     data class EnCamino(val repartidor: String) : EstadoPedido()
@@ -59,7 +59,7 @@ sealed class EstadoPedido {
     data class Cancelado(val motivo: String) : EstadoPedido()
 }
 
-// 2. Expresión 'when' exhaustiva (no requiere 'else')
+
 fun mostrarEstado(estado: EstadoPedido): String {
     return when (estado) {
         is EstadoPedido.Preparando -> "El pedido está en preparación."
