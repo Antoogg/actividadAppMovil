@@ -107,7 +107,7 @@ fun main() = runBlocking {
         Plato("Producto Inválido", -2000.0, "Chico")
     )
 
-    val miPedido = Pedido(cliente, pedProduc, horaPed = 20)
+    
     val bebidasAlcoholicas = pedProduc.filterIsInstance<Bebida>()
         .filter { it.esAlcoholica }
     val nomBebAlcoholicas = bebidasAlcoholicas.map { it.nombre }
@@ -131,6 +131,8 @@ fun main() = runBlocking {
 }
 
     val subTotal = producValidos.sumOf { it.calcularPrecioFinal() }
+
+    val miPedido = Pedido(cliente, pedProduc, horaPed = 20)
 
     val etiquetaEnvio = cliente.let {
         val prioridad = if (it.esCliFrecuente) "Alta" else "Normal"
