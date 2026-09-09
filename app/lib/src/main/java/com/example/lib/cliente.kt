@@ -41,11 +41,11 @@ class Bebida(
 
 class Pedido(val cliente: Cliente, val productos: List<Producto>, val horaPed: Int) {
     val total: Double = productos.sumOf { it.calcularPrecioFinal() }
-    val recargoNoc: Double = if (horaPed >= 22 || horaPed < 6) 1000.0 else 0.0
-    val calfiEnvioGratis: Boolean = total >= 15000 && cliente.esCliFrecuente
+    val recargoNoc: Double = if (horaPed>=22 || horaPed<6) 1000.0 else 0.0
+    val calfiEnvioGratis: Boolean = total>=15000 && cliente.esCliFrecuente
 
     fun calcularTotalFinal(): Double {
-        return total + recargoNoc
+        return total+recargoNoc
     }
 }
 
@@ -69,7 +69,25 @@ fun mostrarEstado(estado: EstadoPedido): String {
     }
 }
 
-fun main() {
+suspend fun confirmarPago(monto: Double): Boolean {
+    delay(1000)
+    return monto > 0
+}
+suspend fun asignarDelivery(): String {
+    delay(1000)
+    return "Carlos"
+}
+suspend fun procesarPedido(monto: Double) = coroutineScope {
+    launch { println("Notificación: Tu pedido está siendo preparado") }
+
+    val pago = async { confirmarPago(monto) }
+    val repartidor = async { asignarDelivery() }
+
+    println("Pago aprobado: ${pago.await()} | Repartidor asignado: ${repartidor.await()}")
+}
+
+
+suspend fun main() {
     val cliente = Cliente("Ana Gómez", "Av España 304", esCliFrecuente = true)
     val pedProduc: List<Producto> = listOf(
         Plato("Hamburguesa Doble Queso", 12000.0, "Grande"),
@@ -79,14 +97,15 @@ fun main() {
         Bebida("Vino Tinto", 8000.0, esAlcoholica = true)
     )
 
-    val bebidasAlcoholicas = pedProduc.filterIsInstance<Bebida>()
+    val miPedido=Pedido(cliente, pedProduc, horaPed=20)
+    val bebidasAlcoholicas=pedProduc.filterIsInstance<Bebida>()
         .filter { it.esAlcoholica }
-    val nomBebAlcoholicas = bebidasAlcoholicas.map { it.nombre }
-    val subTotal = pedProduc.sumOf { it.calcularPrecioFinal() }
+    val nomBebAlcoholicas=bebidasAlcoholicas.map { it.nombre }
+    val subTotal=pedProduc.sumOf { it.calcularPrecioFinal() }
 
     println("Pedido en preparacion para: ${cliente.nombre} entrega en ${cliente.direccion} (¿Clienta Frecuente?: ${cliente.esCliFrecuente})")
 
-    val productosValidos = pedProduc.filter { it.precioBase > 0 }
+    val producValidos=pedProduc.filter { it.precioBase > 0 }
         .also { println("Log: Se confirmaron ${it.size} productos válidos.") }
 
     val etiquetaEnvio = cliente.let {
@@ -95,29 +114,18 @@ fun main() {
     }
 
     val resumen = ResumenPedido().apply {
-        cantidadProductos = productosValidos.size
-        totalAPagar = productosValidos.sumOf { it.calcularPrecioFinal() }
+        cantidadProductos = producValidos.size
+        totalAPagar = producValidos.sumOf { it.calcularPrecioFinal() }
     }
 
     val costoEnvio = cliente.run {
         if (esCliFrecuente) 0.0 else 3500.0
     }
 
-    println("Costo de envío: $$costoEnvio")
     println(etiquetaEnvio)
-    println("Nombres de bebidas alcohólicas: $nomBebAlcoholicas")
-    println("Total del pedido: $$subTotal")
+    println("Bebidas alcohólicas: $nomBebAlcoholicas | Subtotal: $$subTotal | Envío: $$costoEnvio")
 
-    // --- Prueba del flujo de Estados ---
-    println("\n--- ESTADOS DEL PEDIDO ---")
-    val estados: List<EstadoPedido> = listOf(
-        EstadoPedido.Preparando,
-        EstadoPedido.EnCamino("Carlos"),
-        EstadoPedido.Entregado,
-        EstadoPedido.Cancelado("Sin cobertura disponible")
-    )
+    println(mostrarEstado(EstadoPedido.Preparando))
 
-    for (estado in estados) {
-        println(mostrarEstado(estado))
-    }
+    procesarPedido(miPedido.calcularTotalFinal())
 }
