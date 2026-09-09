@@ -1,4 +1,5 @@
 package com.example.lib
+
 import kotlinx.coroutines.*
 
 data class Cliente(val nombre: String, val direccion: String, val esCliFrecuente: Boolean)
@@ -59,6 +60,7 @@ sealed class EstadoPedido {
     data class Cancelado(val motivo: String) : EstadoPedido()
 }
 
+
 fun mostrarEstado(estado: EstadoPedido): String {
     return when (estado) {
         is EstadoPedido.Preparando -> "El pedido está en preparación."
@@ -107,7 +109,7 @@ fun main() = runBlocking {
         Plato("Producto Inválido", -2000.0, "Chico")
     )
 
-    
+
     val bebidasAlcoholicas = pedProduc.filterIsInstance<Bebida>()
         .filter { it.esAlcoholica }
     val nomBebAlcoholicas = bebidasAlcoholicas.map { it.nombre }
@@ -118,7 +120,7 @@ fun main() = runBlocking {
     val producValidos = pedProduc.filter { producto ->
         try {
             require(producto.precioBase >= 0){
-            "Producto Inválido: ${producto.nombre} tiene pprecio negativo"
+            "Producto Inválido: ${producto.nombre} tiene precio negativo"
         }
         true
 
@@ -132,7 +134,11 @@ fun main() = runBlocking {
 
     val subTotal = producValidos.sumOf { it.calcularPrecioFinal() }
 
-    val miPedido = Pedido(cliente, pedProduc, horaPed = 20)
+    val miPedido = Pedido(cliente, pedProduc, horaPed = 23)
+
+    println("Recargo nocturno: $${miPedido.recargoNoc}")
+    println("¿Aplica envío gratis?: ${miPedido.calfiEnvioGratis}")
+    println("Total a pagar: $${miPedido.calcularTotalFinal()}")
 
     val etiquetaEnvio = cliente.let {
         val prioridad = if (it.esCliFrecuente) "Alta" else "Normal"
@@ -141,8 +147,11 @@ fun main() = runBlocking {
 
     val resumen = ResumenPedido().apply {
         cantidadProductos = producValidos.size
-        totalAPagar = producValidos.sumOf { it.calcularPrecioFinal() }
+        totalAPagar = miPedido.calcularTotalFinal()
     }
+
+    println("Cantidad de productos: ${resumen.cantidadProductos}")
+    println("Total a pagar: $${resumen.totalAPagar}")
 
     val costoEnvio = cliente.run {
         if (subTotal >= 15000.0 && esCliFrecuente) {
@@ -158,3 +167,4 @@ fun main() = runBlocking {
     println(mostrarEstado(EstadoPedido.Preparando))
 
     procesarPedido(miPedido.calcularTotalFinal())
+}
