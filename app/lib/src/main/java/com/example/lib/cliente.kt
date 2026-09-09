@@ -1,6 +1,6 @@
 package com.example.lib
-
 import kotlinx.coroutines.*
+
 
 data class Cliente(val nombre: String, val direccion: String, val esCliFrecuente: Boolean)
 
@@ -52,7 +52,7 @@ class Pedido(val cliente: Cliente, val productos: List<Producto>, val horaPed: I
 
 class ResumenPedido(var cantidadProductos: Int = 0, var totalAPagar: Double = 0.0)
 
-
+// 1. Definición de Sealed Class
 sealed class EstadoPedido {
     object Preparando : EstadoPedido()
     data class EnCamino(val repartidor: String) : EstadoPedido()
@@ -60,7 +60,7 @@ sealed class EstadoPedido {
     data class Cancelado(val motivo: String) : EstadoPedido()
 }
 
-
+// 2. Expresión 'when' exhaustiva (no requiere 'else')
 fun mostrarEstado(estado: EstadoPedido): String {
     return when (estado) {
         is EstadoPedido.Preparando -> "El pedido está en preparación."
@@ -137,7 +137,7 @@ fun main() = runBlocking {
     val miPedido = Pedido(cliente, pedProduc, horaPed = 23)
 
     println("Recargo nocturno: $${miPedido.recargoNoc}")
-    println("¿Aplica envío gratis?: ${miPedido.calfiEnvioGratis}")
+    println("¿Aplica envío gratis?: ${if (miPedido.calfiEnvioGratis) "Sí" else "No"}")
     println("Total a pagar: $${miPedido.calcularTotalFinal()}")
 
     val etiquetaEnvio = cliente.let {
